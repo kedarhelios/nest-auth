@@ -1,8 +1,15 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UnauthorizedException,
+  UsePipes,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/signup.dto';
+import { SignUpDto, signUpDtoSchema } from './dto/signup.dto';
 import { SignInDto } from './dto/signin.dto';
+import { ZodValidationPipe } from 'src/utils/zodValidation.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +19,7 @@ export class AuthController {
   ) {}
 
   @Post('/signup')
+  @UsePipes(new ZodValidationPipe(signUpDtoSchema))
   async signUp(@Body() signUpDto: SignUpDto) {
     const user = await this.userService.create(signUpDto);
     const token = this.authService.createJwtToken(String(user._id));
